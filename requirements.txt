@@ -1,0 +1,4 @@
+python-dotenv==0.21.1
+pandas==1.5.3
+numpy==1.23.5
+fastparquet==2023.1.0
