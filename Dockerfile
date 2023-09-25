@@ -14,6 +14,8 @@ COPY requirements.txt ./
 # Install the required packages
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN python -m nltk.downloader popular
+
 # Make port 8888 available for the app to bind to
 EXPOSE 8888
 
