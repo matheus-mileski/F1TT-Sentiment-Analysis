@@ -1,3 +1,4 @@
+print("Importing dependencies")
 import re
 import string
 import numpy as np
@@ -107,16 +108,17 @@ def text_preprocessing(text):
     return text
     
 if __name__ == "__main__":
-    print(main)
-    # Read the CSV file
+    print("Running main")
+    
+    print("Read the CSV file")
     columns  = ["polarity", "id", "date", "flag", "user", "text"]
     encode = "ISO-8859-1"
-    s140 = pd.read_csv("../data/training.1600000.processed.noemoticon.csv",  encoding=encode , names=columns)
+    s140 = pd.read_csv("/home/jovyan/work/data/training.1600000.processed.noemoticon.csv",  encoding=encode , names=columns)
     s140.drop(columns=['id', 'flag', 'user'], inplace=True)
 
     # display(s140.head())
 
-    # Convert the date column to datetime and UTC timezone
+    print("Convert the date column to datetime and UTC timezone")
     s140['date'] = s140['date'].str.replace(" PDT", "")
     s140['date'] = pd.to_datetime(s140['date'], format="%a %b %d %H:%M:%S %Y")
     s140['date'] = s140['date'] + pd.Timedelta(hours=7)
@@ -140,7 +142,7 @@ if __name__ == "__main__":
 
     df = pd.concat([data_pos, data_neg])
 
-    # ## Limpeza dos textos
+    print("Data cleaning")
     # Remover:
     # - stopwords
     # - emojis (o dataset de treino não possui, mas o de validação sim)
@@ -149,6 +151,8 @@ if __name__ == "__main__":
 
     df["original_length"] = df["text"].apply(len)
     df["text_processed"] = df["text"].apply(lambda text : text_preprocessing(text))
+    print("Exporting processed tweets.")
+    df.to_csv("processed_tweets.csv")
     #df.head()
 
 
@@ -171,7 +175,7 @@ if __name__ == "__main__":
 
     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size = 0.25, random_state = 49)
 
-
+    print("TF-IDF")
     vectorizer_1_3_gram = TfidfVectorizer(ngram_range=(1,3))
     vectorizer_1_3_gram.fit(X_train)
 
@@ -219,7 +223,7 @@ if __name__ == "__main__":
     X_train_3_gram = vectorizer_3_gram.transform(X_train)
     X_test_3_gram  = vectorizer_3_gram.transform(X_test)
 
-
+    print("Start training")
     results_df = pd.DataFrame(columns=['Model', 'Dataset', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'AUC', 'True Neg ','False Pos ', 'False Neg ','True Pos '])
 
     BNBmodel = BernoulliNB()
