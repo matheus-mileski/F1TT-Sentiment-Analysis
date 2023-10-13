@@ -2,7 +2,7 @@ version: '3'
 
 services:
   jupyter:
-    cpuset: "0-6"
+    #cpuset: "0-6" # only enable if multicore
     build:
       context: .
       dockerfile: Dockerfile

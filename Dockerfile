@@ -20,6 +20,6 @@ RUN python -m nltk.downloader popular
 EXPOSE 8888
 
 ENV JUPYTER_ENABLE_LAB=yes
-CMD [ "python", "-u", "work/notebooks/SentimentAnalysis.py"]
-#CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+#CMD [ "python", "-u", "work/notebooks/SentimentAnalysis.py"] # run the script
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
 
