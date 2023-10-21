@@ -6,6 +6,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    user: "${USER_ID}:${GROUP_ID}"
+    environment:
+      - NB_UID=${USER_ID}
+      - NB_GID=${GROUP_ID}
     ports:
       - "8888:8888"
     volumes:

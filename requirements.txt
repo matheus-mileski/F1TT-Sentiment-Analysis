@@ -7,3 +7,4 @@ nltk==3.8.1
 wordcloud==1.9.2
 polars[all]==0.19.8
 emoji==2.8.0
+pytest==7.4.2
