@@ -5,3 +5,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*googleusercontent.com.json
+settings.yaml
+*.pkl
+models
+predictions

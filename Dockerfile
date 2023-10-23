@@ -13,7 +13,7 @@ RUN usermod -aG root jovyan
 
 USER jovyan
 
-# Copy the current directory contents into the container at /app
+# Copy the current directory contents into the container
 COPY requirements.txt ./
 COPY GoogleNews-vectors-negative300.bin.gz ./
 
@@ -26,6 +26,9 @@ RUN python -m nltk.downloader popular
 RUN mkdir word2vec_data && \
     gunzip -c GoogleNews-vectors-negative300.bin.gz > word2vec_data/GoogleNews-vectors-negative300.bin && \
     rm GoogleNews-vectors-negative300.bin.gz
+
+# Set PYTHONPATH
+ENV PYTHONPATH "${PYTHONPATH}:/work/src"
 
 # Make port 8888 available for the app to bind to
 EXPOSE 8888

@@ -492,7 +492,8 @@ def extract_url_info(text, ignore_errors = False):
             url_original = url
             if not url.startswith("http"):
                 url = "http://"+url
-            
+                
+            url = url.replace(r"]", "")
             parsed_url = urlparse(url)
             domain = parsed_url.netloc.replace("www.", "")
             path = parsed_url.path.strip("/").replace("/", " ")
@@ -502,6 +503,10 @@ def extract_url_info(text, ignore_errors = False):
             text = text.replace(url_original, url_info)
         return text
     except Exception as e:
+        if str(e) == "Invalid IPv6 URL":
+            text = remove_urls(text, ignore_errors = False)
+            return text
+        
         error = f"Error in extract_url_info: {str(e)}\nText: {text}"
         if ignore_errors:
             print(error)

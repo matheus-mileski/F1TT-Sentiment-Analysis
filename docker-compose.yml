@@ -7,6 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     user: "${USER_ID}:${GROUP_ID}"
+    mem_limit: 9g
+    memswap_limit: 200g
     environment:
       - NB_UID=${USER_ID}
       - NB_GID=${GROUP_ID}
