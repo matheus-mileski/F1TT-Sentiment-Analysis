@@ -150,22 +150,13 @@ def evaluate_pca(feature_matrix_path, labels_path, pca_components_path, pca_vari
     joblib.dump(svd_components, pca_components_reduced_path)
     joblib.dump(svd.explained_variance_ratio_, pca_variance_ratio_reduced_path)
 
-def evaluate_models(feature_matrix_path, labels_path, models_path, predictions_path, test_size=0.2):
+def evaluate_models(feature_matrix_path, labels_path, models_path, predictions_path, models, test_size=0.4):
     # Load the feature matrix and labels
     feature_matrix = joblib.load(feature_matrix_path)
     labels = joblib.load(labels_path)
 
     # Split the dataset into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(feature_matrix, labels, test_size=test_size, random_state=42)
-
-    # Initialize models
-    models = {
-        'Naive Bayes': GaussianNB(),
-        'SVM': SVC(probability=True),
-        'Logistic Regression': LogisticRegression(),
-        'Random Forest': RandomForestClassifier(),
-        'MLPClassifier': MLPClassifier(),
-    }
 
     # Initialize metrics
     metrics = {
@@ -248,7 +239,7 @@ def create_cnn_model(max_words, max_len, vector_size):
     return model
 
 
-def evaluate_deep_learning_models(preprocessed_data_path, models_path, predictions_path, test_size=0.2, max_words=10000, max_len=100, epochs=100, batch_size=32, validation_split=0.2, test=False):
+def evaluate_deep_learning_models(preprocessed_data_path, models_path, predictions_path, cnn, lstm, test_size=0.4, max_words=10000, max_len=100, epochs=100, batch_size=32, validation_split=0.2, test=False):
     # Load the dataset
     encode = 'ISO-8859-1'
     df = pl.read_csv(preprocessed_data_path, encoding=encode)
@@ -279,10 +270,17 @@ def evaluate_deep_learning_models(preprocessed_data_path, models_path, predictio
 
     # Initialize deep learning models
     vector_size = word2vec_features.shape[1]
-    models = {
-        'LSTM': create_lstm_model(max_words, max_len, vector_size),
-        'CNN': create_cnn_model(max_words, max_len, vector_size),
-    }
+    
+    if not lstm and not cnn:
+        return
+    
+    models = {}
+    if lstm:
+        models['LSTM'] =  create_lstm_model(max_words, max_len, vector_size)
+        
+    if cnn:
+        models['CNN'] = create_cnn_model(max_words, max_len, vector_size)
+        
 
     # Train and evaluate deep learning models
     for model_name, model in models.items():
@@ -340,12 +338,66 @@ def main():
     print("Start script")
     
     test = False
-    if len(sys.argv[1:]):
+    CNN = False
+    LSTM = False
+    models = {}
+    
+    if len(sys.argv[1:]) > 0:
         args = sys.argv[1:]
-        if args[0] == '-test':
+        if '-test' in args:
             print("Running test environment")
             test = True
-    
+            
+        if '-NB' in args:
+            print("Naive Bayes selected")
+            models['Naive Bayes'] = GaussianNB()
+            
+        if '-SVM' in args:
+            print("SVM selected")
+            models['SVM'] = SVC(probability=True)
+            
+        if '-LR' in args:
+            print("Logistic Regression selected")
+            models['Logistic Regression'] = LogisticRegression(n_jobs=-1)
+            
+        if '-RF' in args:
+            print("Random Forest selected")
+            models['Random Forest'] = RandomForestClassifier(n_jobs=-1)
+            
+        if '-MLP' in args:
+            print("MLPClassifier selected")
+            models['MLPClassifier'] = MLPClassifier()
+        
+        if '-CNN' in args:
+            print("CNN selected")
+            CNN = True 
+        
+        if '-LSTM' in args:
+            print("LSTM selected")
+            LSTM = True 
+            
+        if not models:
+            models = {
+                'Naive Bayes': GaussianNB(),
+                'SVM': SVC(probability=True),
+                'Logistic Regression': LogisticRegression(n_jobs=-1),
+                'Random Forest': RandomForestClassifier(n_jobs=-1),
+                'MLPClassifier': MLPClassifier(),
+            }
+            
+    else:
+        # Initialize models
+        models = {
+            'Naive Bayes': GaussianNB(),
+            'SVM': SVC(probability=True),
+            'Logistic Regression': LogisticRegression(n_jobs=-1),
+            'Random Forest': RandomForestClassifier(n_jobs=-1),
+            'MLPClassifier': MLPClassifier(),
+        }
+        
+        CNN = True
+        LSTM = True
+            
     # Paths and filenames
     raw_data_path_s140 = "data/training.1600000.processed.noemoticon.csv"
     raw_data_path_f1 = "data/F1_tweets.csv"
@@ -411,13 +463,13 @@ def main():
         
     print("Evaluating machine learning models...")
     start = time()
-    evaluate_models(feature_matrix_path_s140, labels_path_s140, models_path, predictions_path)
+    evaluate_models(feature_matrix_path_s140, labels_path_s140, models_path, predictions_path, models)
     end = time()
     print(f"Machine learning models evaluated.\nTime elapsed: {(end - start)/60} min")
 
     print("Evaluating deep learning models...")
     start = time()
-    evaluate_deep_learning_models(preprocessed_data_path_s140, models_path, predictions_path, test=test)
+    evaluate_deep_learning_models(preprocessed_data_path_s140, models_path, predictions_path, CNN, LSTM, test=test)
     end = time()
     print(f"Deep learning models evaluated.\nTime elapsed: {(end - start)/60} min")
 
